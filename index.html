@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mohit Dahal</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    /* Extra hardening so it doesn’t “feel” like a video */
+    video {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  </style>
+</head>
+<body class="bg-black text-white">
+
+  <!-- HERO: full-height, centered video container -->
+  <section id="hero" class="relative h-screen w-full overflow-hidden bg-black">
+    <!-- Landscape 16:9 -->
+    <video
+      id="vidLandscape"
+      class="absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-300 pointer-events-none select-none"
+      autoplay
+      muted
+      playsinline
+      disablepictureinpicture
+      controlslist="nodownload noplaybackrate noremoteplayback"
+      preload="auto"
+      aria-hidden="true"
+      tabindex="-1"
+    ></video>
+
+    <!-- Portrait 9:16 -->
+    <video
+      id="vidPortrait"
+      class="absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-300 pointer-events-none select-none"
+      autoplay
+      muted
+      playsinline
+      disablepictureinpicture
+      controlslist="nodownload noplaybackrate noremoteplayback"
+      preload="metadata"
+      aria-hidden="true"
+      tabindex="-1"
+    ></video>
+
+    <!-- Optional overlay blocker (further prevents accidental taps) -->
+    <div class="absolute inset-0" style="pointer-events:auto"></div>
+  </section>
+
+  <!-- Next section (so you can scroll)
+  <section class="min-h-screen flex items-center justify-center">
+    <h1 class="text-3xl md:text-5xl font-semibold">Projects come here ↓</h1>
+  </section> -->
+
+  <canvas id="mouseTrail" style="position:fixed;top:0;left:0;pointer-events:none;z-index:9999;"></canvas>
+
+
+  <script src="./script.js" defer></script>
+</body>
+</html>
