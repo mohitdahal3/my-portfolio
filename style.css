@@ -1,0 +1,113 @@
+/* Project card shadow + hover lift + responsive typography
+   Put this file at ./styles.css and add:
+     <link rel="stylesheet" href="./styles.css">
+   inside your <head>.
+*/
+
+/* Extra hardening so it doesn’t “feel” like a video */
+video {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* --- Shadow layer (keeps shadow in place while content lifts) --- */
+.project-shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem; /* match rounded-2xl */
+  pointer-events: none;
+  z-index: 0;
+
+  /* layered shadow tuned for a black background:
+     - strong dark drop for perceived elevation
+     - subtle light halo for separation from black background
+  */
+  box-shadow:
+    0 0 25px -10px white
+}
+
+/* --- Inner surface that moves when hovered --- */
+.project-inner {
+  position: relative;
+  z-index: 10;
+  border-radius: 1rem;      /* match outer rounding */
+  overflow: hidden;         /* crop image corners */
+  background: #000;         /* keep surface black to match page */
+  border: 1px solid rgba(255, 255, 255, 0.53); /* subtle white border */
+  transition: transform 240ms cubic-bezier(.2,.9,.2,1);
+  will-change: transform;
+}
+
+/* card wrapper hover moves only the inner surface */
+.project-card:hover .project-inner {
+  transform: translateY(-10px);
+}
+
+/* make sure initial reveal (opacity/translate) lives on the outer card
+   but hover transform is applied to .project-inner only. */
+
+/* --- Typographic tuning (responsive) --- */
+.project-title {
+  margin: 0;
+  font-size: 1.15rem; /* mobile baseline ~16.8px */
+  line-height: 1.25;
+}
+
+/* description */
+.project-desc {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(255,255,255,0.86);
+  line-height: 1.47;
+  padding-bottom: 0.5rem;
+}
+
+/* buttons */
+.project-btn {
+  font-size: 0.99rem;
+  padding-inline: 0.6rem;
+  padding-block: 0.45rem;
+}
+
+/* Responsive upscaling on medium+ screens */
+@media (min-width: 640px) {
+  .project-title { font-size: 1.4rem; }   /* ~18.4px */
+  .project-desc  { font-size: 1rem; }   /* ~16px */
+  .project-btn   { font-size: 0.98rem; padding-inline: 0.75rem; padding-block: 0.48rem; }
+}
+
+@media (min-width: 1024px) {
+  .project-title { font-size: 1.5rem; }   /* ~20px */
+  .project-desc  { font-size: 1.1rem; }   /* ~16.8px */
+  .project-btn   { font-size: 1.03rem; padding-inline: 0.9rem; padding-block: 0.5rem; }
+}
+
+/* Slight polish: reduce motion for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .project-card,
+  .project-inner {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* Ensure the grid stays centered and consistent (a gentle safety net if Tailwind classes differ) */
+#projectGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem; /* matches the tailwind 'gap-8' spacing */
+}
+
+/* if needed, make the card width fallback consistent for older browsers */
+.project-card {
+  /* keep the width set by Tailwind if available; fallback to reasonable width */
+  max-width: 22rem;
+}
+
+/* tiny accessibility note: visible focus ring for keyboard users on card buttons */
+.project-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
+  border-radius: 8px;
+}

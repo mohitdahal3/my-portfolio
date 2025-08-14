@@ -1,0 +1,44 @@
+[
+    {
+        "image": "./images/roadmap to calculus.jpg",
+        "title": "Roadmap to Calculus",
+        "desc": "I made a nine videos long course on youtube. It clearly lays out the foundations of Calculus ina visual way. I made the visuals using manim. It is in Nepali language.",
+        "buttons": [
+            {
+                "text": "View on Youtube",
+                "link": "https://www.youtube.com/playlist?list=PL5Q4fSqgVM33ZjjYRGL399pQth6PURU-n"
+            },
+            {
+                "text": "View Code",
+                "link": "https://github.com/mohitdahal3/Learn-with-us-Manim"
+            }
+
+        ]
+    },
+
+    {
+        "image": "./images/archana website.png",
+        "title": "Website for Archana",
+        "desc": "Archana helps street dogs in Nepal. She provides food and shelter for the dogs and has helped over 120 dogs already. I helped her by making a website so anybody can read her story and donate.",
+        "buttons": [
+            {
+                "text": "Check out the Website",
+                "link": "https://www.archukomaya.org/"
+            }
+
+        ]
+    },
+
+    {
+        "image": "./images/The MAC Logo.png",
+        "title": "Content for MAC",
+        "desc": "I am making explainer videos for Mathematics Achievement Center (MAC), YSU. So far, I have covered a couple of topics in college algebra. The videos are visually attractive and explain the topics in detail.",
+        "buttons": [
+            {
+                "text": "See the Code",
+                "link": "https://github.com/MAC-Manim-Project"
+            }
+
+        ]
+    }
+]

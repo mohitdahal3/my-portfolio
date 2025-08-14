@@ -155,6 +155,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
+
+
+
 // === Mouse Trail (tapered, time-decaying, speed-responsive) ===
 (() => {
   const canvas = document.getElementById('mouseTrail');
@@ -248,4 +251,146 @@ document.addEventListener("DOMContentLoaded", async () => {
     requestAnimationFrame(draw);
   }
   draw();
+})();
+
+
+
+
+
+
+
+
+// ========== PROJECTS RENDERING FROM data.json ==========
+// (Drop this into your existing script.js — it is self-contained and will only run if there's an element with id="projectGrid")
+(() => {
+  const GRID_ID = 'projectGrid';
+  const DATA_URL = './data.json';
+
+  const grid = document.getElementById(GRID_ID);
+  if (!grid) return;
+
+  // IntersectionObserver for fade-in-on-scroll (unchanged)
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        e.target.classList.remove('opacity-0', 'translate-y-4');
+        io.unobserve(e.target);
+      }
+    }
+  }, { root: null, threshold: 0.15 });
+
+  // Helper: create one project card
+  function createCard(project) {
+    const { image, title, desc, buttons = [] } = project;
+
+    // Outer card container (keeps initial animation classes and layout)
+    // NOTE: we intentionally keep animation classes on the card itself.
+    const card = document.createElement('article');
+    card.className = [
+      'project-card',                     // our semantic hook
+      'w-[min(90vw,22rem)]',              // responsive width (keeps your previous size)
+      'relative',                         // for absolute shadow
+      'opacity-0 translate-y-4',          // starting animation state (removed by IO)
+      'transition duration-700 ease-out will-change-transform'
+    ].join(' ');
+
+    // Shadow layer (absolute, stays put)
+    const shadowDiv = document.createElement('div');
+    shadowDiv.className = 'project-shadow';
+
+    // Inner content layer (this is what moves on hover)
+    const inner = document.createElement('div');
+    inner.className = [
+      'project-inner',                    // visual surface + hover lift behavior
+      'p-4'                               // padding (Tailwind helps layout)
+    ].join(' ');
+
+    // Image container enforcing 4:3 (height = 75% of width) and cropping (object-cover)
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'relative w-full pt-[75%] bg-neutral-900 overflow-hidden'; // pt-75 -> 4:3
+
+    const img = document.createElement('img');
+    img.className = 'absolute inset-0 w-full h-full object-cover';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.alt = title || 'Project image';
+    img.src = image || '';
+    img.onerror = () => {
+      // graceful fallback if image 404s
+      img.style.display = 'none';
+      imgWrap.style.background =
+        'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))';
+    };
+    imgWrap.appendChild(img);
+
+    // Content area (title, desc, buttons)
+    const content = document.createElement('div');
+    content.className = 'mt-3';
+
+    const h3 = document.createElement('h3');
+    h3.className = 'project-title text-xl font-semibold mb-2';
+    h3.textContent = title || 'Untitled';
+
+    const p = document.createElement('p');
+    p.className = 'project-desc text-white/80 text-sm leading-relaxed mb-4';
+    p.textContent = desc || '';
+
+    // Buttons row
+    const btnRow = document.createElement('div');
+    btnRow.className = 'flex flex-wrap gap-3';
+
+    (buttons || []).slice(0, 4).forEach((b) => {
+      if (!b || (!b.text && !b.link)) return;
+      const a = document.createElement('a');
+
+      // Keep Tailwind classes for spacing & focus visuals, but add .project-btn for responsive font sizing
+      a.className = [
+        'project-btn',
+        'inline-flex items-center justify-center',
+        'px-3 py-2 rounded-lg',
+        'font-medium',
+        'ring-1 ring-white/30 hover:ring-white/70',
+        'bg-white/0 hover:bg-white/10',
+        'transition-colors'
+      ].join(' ');
+
+      a.textContent = b.text || 'Open';
+      a.href = b.link || '#';
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      btnRow.appendChild(a);
+    });
+
+    // assemble
+    content.append(h3, p, btnRow);
+    inner.append(imgWrap, content);
+    card.append(shadowDiv, inner);
+
+    // Observe card for lazy reveal
+    io.observe(card);
+
+    return card;
+  }
+
+  // Load & render
+  async function loadProjects() {
+    try {
+      const res = await fetch(DATA_URL, { cache: 'no-cache' });
+      if (!res.ok) throw new Error(`Failed to fetch ${DATA_URL}: ${res.status}`);
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error('data.json must be an array');
+
+      // Clear and render
+      grid.textContent = '';
+      data.forEach((proj) => grid.appendChild(createCard(proj)));
+    } catch (err) {
+      console.error(err);
+      const fail = document.createElement('p');
+      fail.className = 'text-center text-white/70';
+      fail.textContent = 'Failed to load projects.';
+      grid.replaceChildren(fail);
+    }
+  }
+
+  loadProjects();
 })();

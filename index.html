@@ -4,14 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mohit Dahal</title>
+
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <style>
-    /* Extra hardening so it doesn’t “feel” like a video */
-    video {
-      -webkit-user-select: none;
-      user-select: none;
-    }
-  </style>
+  <link rel="stylesheet" href="./style.css">
+
 </head>
 <body class="bg-black text-white">
 
@@ -49,10 +45,30 @@
     <div class="absolute inset-0" style="pointer-events:auto"></div>
   </section>
 
-  <!-- Next section (so you can scroll)
-  <section class="min-h-screen flex items-center justify-center">
-    <h1 class="text-3xl md:text-5xl font-semibold">Projects come here ↓</h1>
-  </section> -->
+      <!-- Projects Section -->
+    <section id="projects" class="bg-black py-6 min-h-screen">
+      <div class="mx-auto max-w-7xl px-4">
+        <h2 class="text-5xl md:text-6xl font-semibold mb-10 text-center">My Projects</h2>
+
+        <!-- Card grid (flex so rows center nicely) -->
+        <div id="projectGrid" class="flex flex-wrap justify-center gap-8">
+          <!-- JS will populate cards here -->
+        </div>
+      </div>
+    </section>
+
+      <!-- Links Section -->
+    <section id="links" class="bg-black py-6 min-h-screen">
+      <div class="mx-auto max-w-7xl px-4">
+        <h2 class="text-5xl md:text-6xl font-semibold mb-10 text-center">Other Links</h2>
+
+        <!-- Card grid (flex so rows center nicely) -->
+        <div id="linkGrid" class="flex flex-wrap justify-center gap-8">
+          
+        </div>
+      </div>
+    </section>
+
 
   <canvas id="mouseTrail" style="position:fixed;top:0;left:0;pointer-events:none;z-index:9999;"></canvas>
 
