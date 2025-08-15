@@ -531,3 +531,131 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(onScroll, 0);
   });
 })();
+
+
+
+
+
+
+
+
+
+
+
+// ===== Minimal modal controller (single modal) =====
+(() => {
+  const modal = document.getElementById('contactModal');
+  if (!modal) return;
+
+  const overlay = modal.querySelector('[data-modal-overlay]');
+  const panel   = modal.querySelector('[role="dialog"]');
+  const nameInput = modal.querySelector('#contactName');
+  const textarea  = modal.querySelector('#contactMessage');
+
+  // Any element with this attribute will open the modal
+  const openers = document.querySelectorAll('[data-open-modal]');
+  // Any element inside the modal with this attribute will close it
+  const closers = modal.querySelectorAll('[data-close-modal]');
+
+  let lastFocused = null;
+  let isOpen = false;
+
+  // --- Auto-grow textarea ---
+  function autoGrow(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+  if (textarea) {
+    autoGrow(textarea);
+    textarea.addEventListener('input', () => autoGrow(textarea));
+  }
+
+  // --- Focus trap (simple) ---
+  function trapTab(e) {
+    if (!isOpen || e.key !== 'Tab') return;
+    const focusables = modal.querySelectorAll(
+      'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])'
+    );
+    const list = Array.from(focusables).filter(el => !el.hasAttribute('disabled'));
+    if (list.length === 0) return;
+
+    const first = list[0];
+    const last  = list[list.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      last.focus();
+      e.preventDefault();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      first.focus();
+      e.preventDefault();
+    }
+  }
+
+  // --- Open / Close helpers ---
+  function openModal() {
+    if (isOpen) return;
+    isOpen = true;
+    lastFocused = document.activeElement;
+
+    // Show container
+    modal.classList.remove('invisible', 'opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100', 'pointer-events-auto');
+
+    // Animate panel in
+    requestAnimationFrame(() => {
+      panel.classList.remove('opacity-0', 'scale-95', 'translate-y-2');
+      panel.classList.add('opacity-100', 'scale-100', 'translate-y-0');
+    });
+
+    // Lock background scroll
+    document.documentElement.classList.add('overflow-hidden');
+
+    // Focus first field
+    if (nameInput) nameInput.focus();
+
+    // Keyboard trap
+    document.addEventListener('keydown', trapTab);
+  }
+
+  function closeModal() {
+    if (!isOpen) return;
+    isOpen = false;
+
+    // Animate panel out
+    panel.classList.remove('opacity-100', 'scale-100', 'translate-y-0');
+    panel.classList.add('opacity-0', 'scale-95', 'translate-y-2');
+
+    // Fade overlay out
+    modal.classList.remove('opacity-100', 'pointer-events-auto');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+
+    // After transition, hide entirely
+    setTimeout(() => {
+      modal.classList.add('invisible');
+    }, 300); // must match duration-300
+
+    // Unlock background scroll
+    document.documentElement.classList.remove('overflow-hidden');
+
+    // Restore focus
+    if (lastFocused && typeof lastFocused.focus === 'function') {
+      lastFocused.focus();
+    }
+
+    document.removeEventListener('keydown', trapTab);
+  }
+
+  // --- Wire triggers ---
+  openers.forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal();
+    });
+  });
+
+  // Close on overlay click
+  overlay.addEventListener('click', () => closeModal());
+
+  // Close on any [data-close-modal] button
+  closers.forEach(btn => btn.addEventListener('click', closeModal));
+})();

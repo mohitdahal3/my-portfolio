@@ -87,14 +87,12 @@
                     Leave me a message. I check all of my messages.
                   </p>
                   <div class="flex flex-wrap gap-3">
-                    <a
-                      href="BUTTON_LINK"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
                       class="project-btn inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-base ring-1 ring-white/30 hover:ring-white/70 bg-white/0 hover:bg-white/10 transition-colors"
+                      data-open-modal
                     >
                       Contact Me
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -178,6 +176,90 @@
 
 
   <canvas id="mouseTrail" style="position:fixed;top:0;left:0;pointer-events:none;z-index:9999;"></canvas>
+
+
+
+
+  <!-- Contact Modal -->
+  <div
+    id="contactModal"
+    class="fixed inset-0 z-[100] grid place-items-center invisible opacity-0 pointer-events-none transition-opacity duration-300"
+    aria-hidden="true"
+  >
+    <!-- Backdrop -->
+    <div
+      data-modal-overlay
+      class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+    ></div>
+
+    <!-- Panel -->
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="contactModalTitle"
+      class="relative max-w-[30rem] w-[92vw] bg-black border border-white/20 rounded-2xl shadow-[0_10px_30px_rgba(255,255,255,0.12),0_0_0_1px_rgba(255,255,255,0.2)] transform opacity-0 scale-95 translate-y-2 transition-all duration-300"
+    >
+      <!-- Scrollable content area with internal max-height -->
+      <div class="p-5 max-h-[85vh] overflow-y-auto">
+        <h3 id="contactModalTitle" class="text-2xl font-semibold text-center mb-4">
+          Send me a Message
+        </h3>
+
+        <form class="space-y-4" onsubmit="return false;">
+          <!-- Name -->
+          <div>
+            <input
+              id="contactName"
+              type="text"
+              placeholder="Name"
+              class="w-full px-3 py-2 rounded-lg bg-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/70"
+            />
+          </div>
+
+          <!-- Phone / Email -->
+          <div>
+            <input
+              id="contactEmailPhone"
+              type="text"
+              placeholder="Phone / Email"
+              class="w-full px-3 py-2 rounded-lg bg-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/70"
+            />
+            <p class="text-xs text-white/60 mt-1">
+              A way for me to contact you.
+            </p>
+          </div>
+
+          <!-- Message (auto-growing) -->
+          <div>
+            <textarea
+              id="contactMessage"
+              placeholder="Your message..."
+              rows="3"
+              class="w-full px-3 py-2 rounded-lg bg-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/70 resize-none overflow-hidden"
+            ></textarea>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-wrap gap-3 justify-end pt-2">
+            <button
+              type="button"
+              data-close-modal
+              class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 ring-1 ring-white/30 text-white font-medium"
+            >
+              Send
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 
 
   <script src="./script.js" defer></script>
