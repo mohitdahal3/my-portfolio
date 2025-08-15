@@ -158,6 +158,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
+
+
 // === Mouse Trail (tapered, time-decaying, speed-responsive) ===
 (() => {
   const canvas = document.getElementById('mouseTrail');
@@ -260,8 +262,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
+
 // ========== PROJECTS RENDERING FROM data.json ==========
-// (Drop this into your existing script.js — it is self-contained and will only run if there's an element with id="projectGrid")
 (() => {
   const GRID_ID = 'projectGrid';
   const DATA_URL = './data.json';
@@ -269,7 +271,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const grid = document.getElementById(GRID_ID);
   if (!grid) return;
 
-  // IntersectionObserver for fade-in-on-scroll (unchanged)
+  // Make sure grid items don't stretch to the tallest in the row
+  // If grid is display:flex or display:grid, we'll enforce vertical centering
+  grid.style.alignItems = 'center';
+
+  // IntersectionObserver for fade-in-on-scroll
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (e.isIntersecting) {
@@ -279,35 +285,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }, { root: null, threshold: 0.15 });
 
-  // Helper: create one project card
   function createCard(project) {
     const { image, title, desc, buttons = [] } = project;
 
-    // Outer card container (keeps initial animation classes and layout)
-    // NOTE: we intentionally keep animation classes on the card itself.
+    // Outer wrapper (fade-in animation)
     const card = document.createElement('article');
     card.className = [
-      'project-card',                     // our semantic hook
-      'w-[min(90vw,22rem)]',              // responsive width (keeps your previous size)
-      'relative',                         // for absolute shadow
-      'opacity-0 translate-y-4',          // starting animation state (removed by IO)
-      'transition duration-700 ease-out will-change-transform'
+      'project-card',
+      'w-[min(90vw,22rem)]',
+      'opacity-0 translate-y-4',
+      'transition duration-700 ease-out will-change-transform',
+      'flex', 'flex-col', 'items-center' // allow vertical alignment
     ].join(' ');
 
-    // Shadow layer (absolute, stays put)
+    // Flow container so shadow + content have natural height
+    const wrapper = document.createElement('div');
+    wrapper.className = 'project-wrapper';
+
+    // Shadow layer (keeps same border radius, but now flows naturally)
     const shadowDiv = document.createElement('div');
     shadowDiv.className = 'project-shadow';
 
-    // Inner content layer (this is what moves on hover)
+    // Inner content (moves on hover)
     const inner = document.createElement('div');
-    inner.className = [
-      'project-inner',                    // visual surface + hover lift behavior
-      'p-4'                               // padding (Tailwind helps layout)
-    ].join(' ');
+    inner.className = 'project-inner p-4';
 
-    // Image container enforcing 4:3 (height = 75% of width) and cropping (object-cover)
+    // Image container
     const imgWrap = document.createElement('div');
-    imgWrap.className = 'relative w-full pt-[75%] bg-neutral-900 overflow-hidden'; // pt-75 -> 4:3
+    imgWrap.className = 'relative w-full pt-[75%] bg-neutral-900 overflow-hidden';
 
     const img = document.createElement('img');
     img.className = 'absolute inset-0 w-full h-full object-cover';
@@ -316,44 +321,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     img.alt = title || 'Project image';
     img.src = image || '';
     img.onerror = () => {
-      // graceful fallback if image 404s
       img.style.display = 'none';
       imgWrap.style.background =
         'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))';
     };
     imgWrap.appendChild(img);
 
-    // Content area (title, desc, buttons)
+    // Content area
     const content = document.createElement('div');
     content.className = 'mt-3';
 
     const h3 = document.createElement('h3');
-    h3.className = 'project-title text-xl font-semibold mb-2';
+    h3.className = 'project-title text-2xl font-semibold mb-2';
     h3.textContent = title || 'Untitled';
 
     const p = document.createElement('p');
-    p.className = 'project-desc text-white/80 text-sm leading-relaxed mb-4';
+    p.className = 'project-desc text-white/80 text-base leading-relaxed mb-4';
     p.textContent = desc || '';
 
-    // Buttons row
+    // Buttons
     const btnRow = document.createElement('div');
     btnRow.className = 'flex flex-wrap gap-3';
-
     (buttons || []).slice(0, 4).forEach((b) => {
       if (!b || (!b.text && !b.link)) return;
       const a = document.createElement('a');
-
-      // Keep Tailwind classes for spacing & focus visuals, but add .project-btn for responsive font sizing
       a.className = [
         'project-btn',
         'inline-flex items-center justify-center',
-        'px-3 py-2 rounded-lg',
-        'font-medium',
+        'px-4 py-2 rounded-lg',
+        'font-medium text-base',
         'ring-1 ring-white/30 hover:ring-white/70',
         'bg-white/0 hover:bg-white/10',
         'transition-colors'
       ].join(' ');
-
       a.textContent = b.text || 'Open';
       a.href = b.link || '#';
       a.target = '_blank';
@@ -361,18 +361,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       btnRow.appendChild(a);
     });
 
-    // assemble
     content.append(h3, p, btnRow);
     inner.append(imgWrap, content);
-    card.append(shadowDiv, inner);
 
-    // Observe card for lazy reveal
+    // Assemble natural flow layout
+    wrapper.append(shadowDiv, inner);
+    card.append(wrapper);
+
     io.observe(card);
-
     return card;
   }
 
-  // Load & render
   async function loadProjects() {
     try {
       const res = await fetch(DATA_URL, { cache: 'no-cache' });
@@ -380,7 +379,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data = await res.json();
       if (!Array.isArray(data)) throw new Error('data.json must be an array');
 
-      // Clear and render
       grid.textContent = '';
       data.forEach((proj) => grid.appendChild(createCard(proj)));
     } catch (err) {
@@ -393,4 +391,143 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   loadProjects();
+})();
+
+
+
+
+
+
+
+
+
+// ========== DIRECTION-AWARE SECTION SNAP (Hero / Projects / Links) ==========
+(() => {
+  const sections = Array.from(document.querySelectorAll('section'));
+  if (sections.length < 2) return;
+
+  // Tunables
+  const OVERLAP_FRAC = 0.05;  // how much of the neighbor must be visible to trigger snap
+  const SNAP_DELAY_MS = 120;   // small debounce so we don't fight micro scrolls
+  const SETTLE_FRAMES = 6;    // rAF frames with no movement -> animation done
+  const NEAR_EPS_PX   = 2;    // close enough to target
+
+  let lastY = window.scrollY;
+  let direction = 'down';
+  let animating = false;
+  let snapTimer = null;
+  let targetY = null;
+  let rafId = null;
+
+  const vh = () => window.innerHeight;
+
+  function centerSectionIndex(rects) {
+    const mid = vh() / 2;
+    let idx = 0;
+    for (let i = 0; i < rects.length; i++) {
+      const r = rects[i];
+      if (r.top <= mid && r.bottom >= mid) {
+        idx = i;
+        break;
+      }
+      // fallback if none contains center (can happen at extreme edges)
+      if (r.top > mid) { idx = Math.max(0, i - 1); break; }
+      if (i === rects.length - 1) idx = i;
+    }
+    return idx;
+  }
+
+  function scheduleSnap(fn) {
+    if (snapTimer) clearTimeout(snapTimer);
+    snapTimer = setTimeout(fn, SNAP_DELAY_MS);
+  }
+
+  function scrollToY(y) {
+    animating = true;
+    targetY = Math.round(Math.max(0, y));
+    window.scrollTo({ top: targetY, behavior: 'smooth' });
+    watchSettle();
+  }
+
+  function watchSettle() {
+    let stable = 0;
+    let last = -1;
+
+    function tick() {
+      const y = Math.round(window.scrollY);
+      if (y === last) stable++; else stable = 0;
+      last = y;
+
+      if (stable >= SETTLE_FRAMES || Math.abs(y - targetY) <= NEAR_EPS_PX) {
+        animating = false;
+        targetY = null;
+        rafId = null;
+        return;
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function snapToNextTop(nextEl) {
+    const y = nextEl.offsetTop; // align next section's top with viewport top
+    scrollToY(y);
+  }
+
+  function snapToPrevBottom(prevEl) {
+    const desired = prevEl.offsetTop + prevEl.offsetHeight - vh();
+    // If the section is shorter than viewport, bottom-align would be above its top; clamp to top.
+    const y = Math.max(prevEl.offsetTop, desired);
+    scrollToY(y);
+  }
+
+  function onScroll() {
+    const y = window.scrollY;
+    const newDir = (y > lastY) ? 'down' : (y < lastY) ? 'up' : direction;
+    if (newDir !== direction && snapTimer) {
+      // if direction flips during debounce, cancel the pending snap
+      clearTimeout(snapTimer);
+      snapTimer = null;
+    }
+    direction = newDir;
+    lastY = y;
+
+    if (animating) return;
+
+    const rects = sections.map(s => s.getBoundingClientRect());
+    const i = centerSectionIndex(rects);
+
+    const threshold = Math.max(8, Math.floor(vh() * OVERLAP_FRAC)); // px threshold
+
+    if (direction === 'down' && i < sections.length - 1) {
+      // How much of the next section is visible?
+      const nextTop = rects[i + 1].top;     // px from viewport top
+      const nextVisible = Math.max(0, vh() - Math.max(0, nextTop));
+      if (nextVisible >= threshold) {
+        scheduleSnap(() => snapToNextTop(sections[i + 1]));
+      }
+    } else if (direction === 'up' && i > 0) {
+      // How much of the previous section is visible (at the top of viewport)?
+      const prevBottom = rects[i - 1].bottom; // px from viewport top
+      const prevVisible = Math.max(0, Math.min(prevBottom, vh())); // visible height at top
+      if (prevVisible >= threshold) {
+        scheduleSnap(() => snapToPrevBottom(sections[i - 1]));
+      }
+    }
+  }
+
+  // Passive so we don't block native scroll inside sections
+  document.addEventListener('scroll', onScroll, { passive: true });
+
+  // Re-evaluate on resize (layout/viewport changes)
+  window.addEventListener('resize', () => {
+    if (!animating) onScroll();
+  }, { passive: true });
+
+  // Nudge once on load (e.g., browser restores mid-page)
+  window.addEventListener('load', () => {
+    setTimeout(onScroll, 0);
+  });
 })();

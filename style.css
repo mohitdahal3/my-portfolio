@@ -4,36 +4,55 @@
    inside your <head>.
 */
 
+/* styles.css */
+html { scroll-behavior: smooth; }
+
+
+
 /* Extra hardening so it doesn’t “feel” like a video */
 video {
     -webkit-user-select: none;
     user-select: none;
 }
 
-/* --- Shadow layer (keeps shadow in place while content lifts) --- */
-.project-shadow {
-  position: absolute;
-  inset: 0;
-  border-radius: 1rem; /* match rounded-2xl */
-  pointer-events: none;
-  z-index: 0;
-
-  /* layered shadow tuned for a black background:
-     - strong dark drop for perceived elevation
-     - subtle light halo for separation from black background
-  */
-  box-shadow:
-    0 0 25px -10px white
+/* Grid items align vertically centered in their row */
+#projectGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center;
 }
 
-/* --- Inner surface that moves when hovered --- */
+/* Flow wrapper to keep shadow + content in same natural height */
+.project-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Shadow layer matches content height now */
+.project-shadow {
+  border-radius: 1rem;
+  pointer-events: none;
+  z-index: 0;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  /* stronger layered shadow for elevation */
+  box-shadow: 0 0 25px -10px white
+}
+
+/* Content surface */
 .project-inner {
   position: relative;
   z-index: 10;
-  border-radius: 1rem;      /* match outer rounding */
-  overflow: hidden;         /* crop image corners */
-  background: #000;         /* keep surface black to match page */
-  border: 1px solid rgba(255, 255, 255, 0.53); /* subtle white border */
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.53);
   transition: transform 240ms cubic-bezier(.2,.9,.2,1);
   will-change: transform;
 }
@@ -105,9 +124,3 @@ video {
   max-width: 22rem;
 }
 
-/* tiny accessibility note: visible focus ring for keyboard users on card buttons */
-.project-btn:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
-  border-radius: 8px;
-}
