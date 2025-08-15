@@ -659,3 +659,64 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Close on any [data-close-modal] button
   closers.forEach(btn => btn.addEventListener('click', closeModal));
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+// Email js Things
+document.querySelector('#sendButton').addEventListener('click', function() {
+  // Check honeypot
+  if (document.getElementById('e-mail').value !== '') return;
+
+  // Get current date in a specific timezone
+  const dateOptions = {
+    weekday: 'long',   // "Thursday"
+    year: 'numeric',   // "2025"
+    month: 'long',     // "August"
+    day: 'numeric',    // "14"
+    timeZone: 'America/New_York'  // For ohio. // For california: America/Los_Angeles
+  };
+
+  const timeOptions = {
+    hour: '2-digit',     // "03"
+    minute: '2-digit',   // "05"
+    hour12: true,         // true = 12-hour format, false = 24-hour
+    timeZone: 'America/New_York'
+  };
+
+  const now = new Date();
+  const dateString = now.toLocaleDateString('en-US', dateOptions);
+  const timeStrine = now.toLocaleTimeString('en-US' , timeOptions);
+
+  let _name = document.getElementById('contactName').value.trim()
+  let _contact = document.getElementById('contactEmailPhone').value.trim()
+  let _message = document.getElementById('contactMessage').value.trim()
+
+  if(_message.length <= 5) {
+    alert("Message too short!")
+    return
+  }
+
+
+  emailjs.send("service_oqk7qc8", "template_rqwajgr", {
+    name: _name,
+    contact: _contact,
+    message: _message,
+    date: dateString,
+    time: timeStrine
+  })
+  .then(function() {
+    document.getElementById("contact-form").reset()
+    alert('Message sent successfully!');
+  }, function(error) {
+    alert('Failed to send message. Error: ' + JSON.stringify(error));
+  });
+});
