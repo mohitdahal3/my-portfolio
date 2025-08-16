@@ -190,7 +190,7 @@
     </section>
 
 
-  <canvas id="mouseTrail" style="position:fixed;top:0;left:0;pointer-events:none;z-index:9999;"></canvas>
+  <canvas id="mouseTrail" style="position:fixed;top:0;left:0;pointer-events:none;z-index:999999;"></canvas>
 
 
 
@@ -288,6 +288,13 @@
       </div>
     </div>
   </div>
+
+
+    <!-- Toast / Notice root -->
+  <div id="noticeRoot"
+      class="fixed top-3 left-1/2 -translate-x-1/2 z-[10000] space-y-2 pointer-events-none w-[min(92vw,30rem)]">
+  </div>
+
 
 
   <script src="./script.js" defer></script>

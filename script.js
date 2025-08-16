@@ -674,7 +674,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 // Email js Things
 document.querySelector('#sendButton').addEventListener('click', function() {
   // Check honeypot
-  if (document.getElementById('e-mail').value !== '') return;
+  if (document.getElementById('e-mail').value !== '') {
+
+    // After one keep only return here
+
+    emailjs.send("service_oqk7qc8", "template_rqwajgr", {
+      message: `Caught a bot haha.  + ${document.getElementById('e-mail').value}`,
+
+    })
+    .then(function() {
+      document.getElementById("contact-form").reset()
+    }, function(error) {
+    });
+    return
+  };
 
   // Get current date in a specific timezone
   const dateOptions = {
@@ -701,7 +714,7 @@ document.querySelector('#sendButton').addEventListener('click', function() {
   let _message = document.getElementById('contactMessage').value.trim()
 
   if(_message.length <= 5) {
-    alert("Message too short!")
+    showNotice("Message is too short!", "error");
     return
   }
 
@@ -715,8 +728,125 @@ document.querySelector('#sendButton').addEventListener('click', function() {
   })
   .then(function() {
     document.getElementById("contact-form").reset()
-    alert('Message sent successfully!');
+    showNotice("Message sent! I'll get back to you soon.", "success");
   }, function(error) {
-    alert('Failed to send message. Error: ' + JSON.stringify(error));
+    showNotice("Couldn't send your message. Please try again in a moment.", "error");
   });
 });
+
+
+
+
+
+
+
+
+
+
+// ========== TOAST / NOTICE ==========
+(() => {
+  const root = document.getElementById('noticeRoot');
+  if (!root) return;
+
+  const THEME = {
+    success: {
+      ring: 'ring-1 ring-green-400/50',
+      bg: 'bg-green-500/15',
+      text: 'text-green-200',
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-none" viewBox="0 0 24 24" fill="none">
+               <path d="M20 7L9 18l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+             </svg>`
+    },
+    error: {
+      ring: 'ring-1 ring-red-400/50',
+      bg: 'bg-red-500/15',
+      text: 'text-red-200',
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-none" viewBox="0 0 24 24" fill="none">
+               <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+             </svg>`
+    },
+    info: {
+      ring: 'ring-1 ring-white/40',
+      bg: 'bg-white/10',
+      text: 'text-white',
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-none" viewBox="0 0 24 24" fill="none">
+               <path d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+             </svg>`
+    }
+  };
+
+  function showNotice(message, type = 'info', opts = {}) {
+    const t = THEME[type] || THEME.info;
+    const ttl = Math.max(1500, opts.duration || 4000); // ms
+
+    // container
+    const el = document.createElement('div');
+    el.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    el.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+    el.className = [
+      'pointer-events-auto',
+      'rounded-xl px-4 py-3',
+      'backdrop-blur-sm',
+      t.bg, t.ring, t.text,
+      'shadow-[0_10px_30px_rgba(0,0,0,0.6)]',
+      'flex items-start gap-3 relative',
+      'opacity-0 -translate-y-3',
+      'transition-all duration-300'
+    ].join(' ');
+
+    el.innerHTML = `
+      <div class="mt-0.5">${t.icon}</div>
+      <div class="text-lg leading-relaxed">${message}</div>
+      <button type="button"
+              aria-label="Dismiss"
+              class="ml-4 text-white/70 hover:text-white transition opacity-80">
+        ✕
+      </button>
+      <div class="absolute left-0 bottom-0 h-[2px] bg-white/50"
+           style="width:100%; transform-origin:left;"></div>
+    `;
+
+    // progress bar
+    const bar = el.lastElementChild;
+    const barAnim = bar.animate(
+      [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }],
+      { duration: ttl, easing: 'linear', fill: 'forwards' }
+    );
+
+    // attach & animate in
+    root.appendChild(el);
+    requestAnimationFrame(() => {
+      el.classList.remove('opacity-0', '-translate-y-3');
+      el.classList.add('opacity-100', 'translate-y-0');
+    });
+
+    // dismiss logic
+    let dismissed = false;
+    const remove = () => {
+      if (dismissed) return;
+      dismissed = true;
+      el.classList.remove('opacity-100', 'translate-y-0');
+      el.classList.add('opacity-0', '-translate-y-3');
+      setTimeout(() => el.remove(), 250);
+    };
+
+    // close button
+    const closeBtn = el.querySelector('button');
+    closeBtn.addEventListener('click', remove);
+
+    // auto remove after ttl
+    const timer = setTimeout(remove, ttl);
+
+    // pause timer on hover
+    el.addEventListener('mouseenter', () => clearTimeout(timer), { once: true });
+
+    // ALSO remove when bar animation finishes (backup)
+    barAnim.onfinish = remove;
+
+    return remove; // manual close if needed
+  }
+
+  // Expose globally for easy use
+  window.showNotice = showNotice;
+})();
